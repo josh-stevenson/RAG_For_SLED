@@ -1,0 +1,169 @@
+RAG System with Nutanix AI Endpoints
+This repository contains a Retrieval Augmented Generation (RAG) system designed to answer questions based on a corpus of PDF documents. It leverages Nutanix AI inference endpoints for both text embeddings and Large Language Model (LLM) inference.
+
+Table of Contents
+Prerequisites
+
+Project Setup
+
+1. Environment Setup
+
+2. API Key Configuration
+
+Workflow Guide
+
+Step 1: Scrape PDF Documents (if applicable)
+
+Step 2: Process PDFs & Build Vector Database
+
+Step 3: Run Interactive RAG Querying
+
+Troubleshooting
+
+Prerequisites
+Before you begin, ensure you have the following installed on your system:
+
+Python 3.10+ (Recommended for Conda environment compatibility)
+
+Anaconda or Miniconda: Essential for managing Python environments and dependencies.
+
+Visual Studio Code (VS Code): With the Jupyter Extension installed, for running the .ipynb notebooks.
+
+Nutanix AI Account & API Key: You will need an API key to access the embedding and LLM inference endpoints. This key should be obtained from your Nutanix AI platform.
+
+Ollama (Optional but Recommended for Local LLM fallback): If you were to switch back to a local LLM in the future, ensure Ollama is installed and the desired model (e.g., llama2) is pulled (ollama pull llama2). Note: The current setup uses a remote LLM endpoint.
+
+Project Setup
+1. Environment Setup
+It is highly recommended to use a dedicated Conda environment to manage project dependencies.
+
+a. Create environment.yml:
+Ensure you have an environment.yml file in your project's root directory with the following content:
+
+# environment.yml
+name: rag_nutanix_env
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - requests
+  - chromadb
+  - pdfplumber
+  - pip:
+    - langchain
+    - langchain-community
+    - langchain-openai
+
+b. Create and Activate the Conda Environment:
+
+Close all instances of VS Code to ensure a clean slate.
+
+Open your Anaconda Prompt (from the Windows Start Menu).
+
+Navigate to your project directory (where environment.yml is located):
+
+cd "C:\Users\JoshStevenson\OneDrive - Nutanix\Technical\AI_Master\AI_APP_PROJECT"
+
+(Adjust path as per your system).
+
+Create the Conda environment:
+
+conda env create -f environment.yml
+
+Note: This step might take a few minutes as it solves dependencies and downloads packages. If it gets stuck ("Solving environment"), try interrupting (Ctrl+C), running conda clean --all, and retrying.
+
+Activate the newly created environment:
+
+conda activate rag_nutanix_env
+
+Your prompt should now show (rag_nutanix_env).
+
+c. Launch VS Code from Activated Environment:
+
+From the same Anaconda Prompt window where your environment is activated, launch VS Code:
+
+code .
+
+This ensures VS Code inherits the correct environment variables.
+
+In VS Code, open a new integrated terminal (Terminal > New Terminal). Verify that (rag_nutanix_env) appears in the prompt.
+
+Select the Python Interpreter in VS Code:
+
+In the bottom-left corner of VS Code, click on the Python interpreter name.
+
+Select Python 3.x.x ('rag_nutanix_env') from the list.
+
+2. API Key Configuration
+Your Nutanix AI API Key is essential for both the embedding and LLM endpoints. For security, it should be set as an environment variable and NEVER hardcoded in your scripts.
+
+nai_api_key.txt: This file should contain your raw Nutanix AI API key. This file is for your reference only and should NOT be committed to public repositories.
+
+Setting the Environment Variable:
+
+Windows (Command Prompt / PowerShell):
+Open a new Command Prompt or PowerShell.
+
+set NUTANIX_API_KEY=YOUR_ACTUAL_NUTANIX_API_KEY_HERE
+
+Then, relaunch VS Code from this terminal as described in 1.c. Launch VS Code from Activated Environment.
+
+Permanently (Windows GUI):
+Search "Environment Variables" > "Edit the system environment variables" > "Environment Variables..." > Under "System variables," edit "Path" > "New". Add your key name and value. Remember to restart VS Code after permanent changes.
+
+Workflow Guide
+Follow these steps in the specified order within your VS Code environment (with rag_nutanix_env active).
+
+Step 1: Scrape PDF Documents (if applicable)
+File: source_web_scrape.ipynb
+
+Purpose: This notebook is intended to contain code for programmatically downloading or scraping PDF documents from a specified web source.
+
+Action: Run the cells in source_web_scrape.ipynb. Ensure that the scraped PDF files are saved into the data/pdfs/ directory within your project folder. If you already have your PDFs, you can skip running this notebook, but ensure they are placed in data/pdfs/.
+
+Step 2: Process PDFs & Build Vector Database
+File: rag_system_full_workflow.ipynb (Sections 1 through 5)
+
+Purpose: This part of the consolidated notebook extracts text from your PDFs, splits them into manageable chunks, generates embeddings using the Nutanix Granite Embedding API, and stores these embeddings in a Chroma vector database (my_vector_db folder).
+
+Action:
+
+Open rag_system_full_workflow.ipynb in VS Code.
+
+Manually delete the my_vector_db folder from your project directory if it exists and you encounter any PermissionError (e.g., [WinError 5] Access is denied). This ensures a fresh database creation.
+
+Run all cells from the beginning of the notebook up to and including Step 5: "Create and Populate the Vector Database (ChromaDB)".
+
+Verify the output messages confirming PDF loading, chunking, embedding API connection, and ChromaDB population.
+
+Step 3: Run Interactive RAG Querying
+File: rag_system_full_workflow.ipynb (Sections 6 through 8)
+
+Purpose: This part initializes the remote LLM (Llama 3.1 via Nutanix AI chat completions API) and sets up an interactive loop where you can ask questions. The system will retrieve relevant chunks from your ChromaDB and use them as context for the LLM to generate accurate responses.
+
+Action:
+
+Continue running the cells in rag_system_full_workflow.ipynb from Step 6: "Initialize the Remote LLM..." onwards.
+
+Once Step 8 starts, you will see a prompt Your Question: in the notebook's output area.
+
+Type your questions there and press Enter. The LLM will generate answers based on your PDF content.
+
+Type exit or quit to end the interactive session.
+
+Troubleshooting
+conda: The term 'conda' is not recognized...: Ensure you are using the Anaconda Prompt, or that VS Code was launched from an Anaconda Prompt where conda is recognized, and that your system's PATH variable is correctly updated if you want conda everywhere.
+
+ModuleNotFoundError: No module named 'langchain_openai': Ensure !pip install langchain-openai (and all other !pip install commands) are run at the very top of your notebook, followed by a kernel restart before running any other code.
+
+PermissionError: [WinError 5] Access is denied: 'my_vector_db': Close all instances of VS Code and any other programs that might be accessing the my_vector_db folder. Then, manually delete the my_vector_db folder using Windows File Explorer. After deletion, restart your Jupyter kernel and re-run the entire rag_system_full_workflow.ipynb from the beginning.
+
+400 Bad Request from Embedding API (context length error): This means your chunks are too long. Verify chunk_size in Step 3 of rag_system_full_workflow.ipynb is set to 400 characters (or less if needed), then re-run Steps 1-5.
+
+404 Not Found from LLM API: This indicates an incorrect endpoint URL. Verify NUTANIX_LLM_ENDPOINT is set to https://ai.nutanix.com/api/v1 in rag_system_full_workflow.ipynb.
+
+LLM Responding in Wrong Language: Ensure your system prompt in Step 7 includes an explicit instruction like "Respond concisely and in English."
+
+API Key Not Found: Double-check that NUTANIX_API_KEY is correctly set as a system environment variable before launching VS Code.

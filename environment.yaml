@@ -1,0 +1,16 @@
+# environment.yml
+name: rag_nutanix_env
+channels:
+  - conda-forge # Prioritize conda-forge for better package availability and recent versions
+  - defaults    # Keep defaults as a fallback
+dependencies:
+  - python=3.10 # Explicit Python version. Keeping 3.10 for stability.
+  - pip
+  - requests
+  - chromadb
+  - streamlit
+  - pip:       # Use pip section for packages that might have better pip compatibility
+    - pdfplumber==0.7.0 # Explicitly installing a specific version of pdfplumber via pip
+    - langchain
+    - langchain-community
+    - langchain-openai
